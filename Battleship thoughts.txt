@@ -4,6 +4,7 @@ Stop: 19:55
 
 day 2
 start: 16:00
+stop: 16:25
 
 Ship sizes and numbers:
 1 Carrier (5x1)

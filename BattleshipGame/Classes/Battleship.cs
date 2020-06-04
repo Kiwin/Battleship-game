@@ -11,7 +11,7 @@ namespace BattleshipGame.Classes
         public int shipSize { get; set; }
         public Battleship()
         {
-            shipSize = 4;
+            this.shipSize = 4;
         }
     }
 }
