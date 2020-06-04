@@ -8,5 +8,10 @@ namespace BattleshipGame.Classes
 {
     class Cruiser
     {
+        public int shipSize { get; set; }
+        public Cruiser()
+        {
+            shipSize = 3;
+        }
     }
 }

@@ -1,0 +1,22 @@
+day 1
+start: 18:25
+Stop: 19:55
+
+day 2
+start: 16:00
+
+Ship sizes and numbers:
+1 Carrier (5x1)
+2 Battleships (4x1)
+3 Cruisers (3x1)
+4 Submarines (3x1)
+5 Destroyers (2x1)
+
+Each player starts with one set of ships (1 Carrier, 2 Battleships, 3 Cruisers, 4 Submarines, 5 Destroyers)
+
+Game flow:
+1. Player one arranges their 10x10 grid with the assigned number of ships by clicking on the tiles in their grid
+2. Player two arranges their 10x10 grid with the assigned number of ships by clicking on the tiles in their grid
+3. Player one targets a tile by clicking on it and either hits or misses.
+4. Player two targets a tile by clicking on it and either hits or misses.
+5. Steps 3 and 4 are repeated until either player's fleet has been sunk.

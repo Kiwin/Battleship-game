@@ -8,6 +8,10 @@ namespace BattleshipGame.Classes
 {
     class Destroyer : IShip
     {
-        public Destroyer
+        public int shipSize { get; set; }
+        public Destroyer()
+        {
+            shipSize = 2;
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace BattleshipGame
 {
     interface IShip
     {
-        int ShipSize { get; set; }
+        int shipSize { get; set; }
 
     }
 }
