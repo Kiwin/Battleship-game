@@ -52,6 +52,7 @@
     <Compile Include="Classes\Cruiser.cs" />
     <Compile Include="Classes\Destroyer.cs" />
     <Compile Include="Classes\Grid.cs" />
+    <Compile Include="Classes\Player.cs" />
     <Compile Include="Classes\Submarine.cs" />
     <Compile Include="Classes\Tile.cs" />
     <Compile Include="GameWindow.cs">

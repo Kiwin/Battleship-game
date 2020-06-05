@@ -1,0 +1,10 @@
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.csprojAssemblyReference.cache
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.GameWindow.resources
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.Properties.Resources.resources
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.csproj.GenerateResource.cache
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.csproj.CoreCompileInputs.cache
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\bin\Debug\BattleshipGame.exe.config
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\bin\Debug\BattleshipGame.exe
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\bin\Debug\BattleshipGame.pdb
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.exe
+C:\Users\fucking lorte styres\source\repos\Battleship-game\BattleshipGame\obj\Debug\BattleshipGame.pdb

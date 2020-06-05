@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BattleshipGame.Classes
 {
-    class Carrier
+    public class Carrier
     {
         public int shipSize { get; set; }
         public Carrier()

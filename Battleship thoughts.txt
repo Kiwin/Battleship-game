@@ -6,6 +6,14 @@ day 2
 start: 16:00
 stop: 16:25
 
+day 3:
+Start: 13:30
+Pause: 15:45
+Resume: 16:00
+Pause: 16:45
+Resume: 17:45
+Pause: 18:15
+
 Ship sizes and numbers:
 1 Carrier (5x1)
 2 Battleships (4x1)
