@@ -29,8 +29,8 @@ namespace BattleshipGame
             // Debug
             player1SecretGridGroupBox.Parent = this;
             player2SecretGridGroupBox.Parent = this;
-            player1PublicGridGroupBox.Parent = this;
-            player2PublicGridGroupBox.Parent = this;
+            //player1PublicGridGroupBox.Parent = this;
+            //player2PublicGridGroupBox.Parent = this;
 
             // Make every button in GroupBox control unclickable
             foreach (Control control in this.player1SecretGridGroupBox.Controls)
@@ -168,6 +168,7 @@ namespace BattleshipGame
                 {
                     // Make every button clickable
                     control.Enabled = true;
+                    control.Click += new EventHandler(placeCarrierOnTile_Click);
                 }
             }
 
@@ -180,7 +181,16 @@ namespace BattleshipGame
                 }
             }
         }
+
+        void placeCarrierOnTile_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            Tile tile = player1.secretGrid.tiles.Where(t => t._button.Name == button.Name).FirstOrDefault();
+            player1.secretGrid.PlaceCarrier(tile);  
+            tile.isOccupied = true;
+        }
         // TODO: Make curPlayer variable
+        // TODO: Place placecarrier function in a smart place (Event handler for button click after placecarrier button has been clicked)
         // TODO: find a way to start the game
         // TODO: Determine which player's turn it is
     }
