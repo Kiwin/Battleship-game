@@ -8,8 +8,11 @@ namespace BattleshipGame.Classes
 {
     public class Player
     {
+        // Player's secret grid
         public Grid secretGrid;
+        // Player's public grid
         public Grid publicGrid;
+        // Ships
         public List<Carrier> carriers = new List<Carrier>();
         public List<Battleship> battleships = new List<Battleship>();
         public List<Cruiser> cruisers = new List<Cruiser>();
@@ -18,43 +21,18 @@ namespace BattleshipGame.Classes
 
         public Player()
         {
+            // 1 carrier
             this.AddCarriers(1);
+            // 2 battleships
             this.AddBattleships(2);
+            // 3 cruisers
             this.AddCruisers(3);
+            // 4 submarines
             this.AddSubmarines(4);
-            this.AddDestroyers(5);
-            
+            // 5 destroyers
+            this.AddDestroyers(5);       
         }
-
-        public void RemoveShip(Type shipType)
-        {
-            if (shipType == typeof(Carrier))
-            {
-                this.carriers.RemoveAt(0);
-            }
-
-            else if (shipType == typeof(Battleship))
-            {
-                this.battleships.RemoveAt(0);
-            }
-
-            else if (shipType == typeof(Cruiser))
-            {
-                this.cruisers.RemoveAt(0);
-            }
-
-            else if (shipType == typeof(Submarine))
-            {
-                this.submarines.RemoveAt(0);
-            }
-
-            else if (shipType == typeof(Destroyer))
-            {
-                this.destroyers.RemoveAt(0);
-            }
-
-        }
-
+        // Add carriers
         private void AddCarriers(int amount)
         {
             for (int i = 0; i < amount; i++)
@@ -62,7 +40,7 @@ namespace BattleshipGame.Classes
                 this.carriers.Add(new Carrier());
             }
         }
-
+        // Add battleships
         private void AddBattleships(int amount)
         {
             for (int i = 0; i < amount; i++)
@@ -70,7 +48,7 @@ namespace BattleshipGame.Classes
                 this.battleships.Add(new Battleship());
             }
         }
-
+        // Add cruisers
         private void AddCruisers(int amount)
         {
             // 1 carrier per player
@@ -79,7 +57,7 @@ namespace BattleshipGame.Classes
                 this.cruisers.Add(new Cruiser());
             }
         }
-
+        // add submarines
         private void AddSubmarines(int amount)
         {
             // 1 carrier per player
@@ -88,7 +66,7 @@ namespace BattleshipGame.Classes
                 this.submarines.Add(new Submarine());
             }
         }
-
+        // add destroyers
         private void AddDestroyers(int amount)
         {
             for (int i = 0; i < amount; i++)

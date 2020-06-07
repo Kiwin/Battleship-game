@@ -8,12 +8,8 @@ using System.Windows.Forms;
 
 namespace BattleshipGame.Classes
 {
-    // Maybe pass in button instead of pos variable
     public class Tile
     {
-        // Position on the 10x10 grid for example "a1"
-        // public int gridPos;
-
         // If tile is occupied by part of a ship
         public bool isOccupied;
         public bool isPlacementValid;
@@ -41,12 +37,13 @@ namespace BattleshipGame.Classes
         // Blue is miss
         public void Miss()
         {
-            this._button.BackColor = Color.Blue;
+            this._button.BackColor = Color.LightBlue;
         }
 
         public void Place()
         {
             // Set tile to occupied and change color of button object to blue
+            this.isPlacementValid = true;
             this.isOccupied = true;
             this._button.BackColor = Color.Blue;
         }
@@ -64,15 +61,18 @@ namespace BattleshipGame.Classes
         }
 
         // Determine whether action is a hit or a miss
-        public void DetermineHitOrMiss()
+        public void DetermineHitOrMiss(Grid secretGrid, int chosenTileIndex)
         {
-            if(this.isOccupied == true)
-            {
-                Hit();
+            if (secretGrid.tiles[chosenTileIndex].isOccupied)
+            { 
+                Console.WriteLine("Tile is occupied");
+                this.Hit();
+                secretGrid.occupiedTilesCount--;
             }
-            else if(this.isOccupied == false)
+            else
             {
-                Miss();
+                this.Miss();
+                Console.WriteLine("Tile is not occupied");
             }
         }
 
