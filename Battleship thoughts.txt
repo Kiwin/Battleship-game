@@ -34,7 +34,7 @@ Pause: 14:00
 Resume: 14:30
 Pause: 16:30
 Resume: 16:45
-Pause: 17:15
+Stop: 17:15
 
 Ship sizes and numbers:
 1 Carrier (5x1)
