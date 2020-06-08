@@ -238,7 +238,7 @@ namespace BattleshipGame.Classes
                 }
 
                 // Place all righttiles
-                if (rightTiles.Count != 0)
+                if (rightTiles.Count == (shipLength - 1))
                 {
                     foreach (Tile rightTile in rightTiles)
                     {
@@ -247,7 +247,7 @@ namespace BattleshipGame.Classes
                     }
                 }
                 // Lefttiles
-                else if (leftTiles.Count != 0)
+                else if (leftTiles.Count == (shipLength - 1))
                 {
                     foreach (Tile leftTile in leftTiles)
                     {
@@ -256,7 +256,7 @@ namespace BattleshipGame.Classes
                     }
                 }
                 // uptiles
-                else if (upTiles.Count != 0)
+                else if (upTiles.Count == (shipLength - 1))
                 {
                     foreach (Tile upTile in upTiles)
                     {
@@ -265,7 +265,7 @@ namespace BattleshipGame.Classes
                     }
                 }
                 // downtiles
-                else if (downTiles.Count != 0)
+                else if (downTiles.Count == (shipLength - 1))
                 {
                     foreach (Tile downTile in downTiles)
                     {
