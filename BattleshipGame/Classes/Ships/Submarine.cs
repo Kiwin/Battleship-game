@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace BattleshipGame.Classes
 {
-    public class Battleship
+    public class Submarine : Ship
     {
-        public int shipSize { get; set; }
-        public Battleship()
+        public Submarine() : base(3)
         {
-            this.shipSize = 4;
         }
+        public override string Name => "Submarine";
     }
 }

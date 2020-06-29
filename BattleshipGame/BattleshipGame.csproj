@@ -47,13 +47,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\Battleship.cs" />
-    <Compile Include="Classes\Carrier.cs" />
-    <Compile Include="Classes\Cruiser.cs" />
-    <Compile Include="Classes\Destroyer.cs" />
-    <Compile Include="Classes\Grid.cs" />
+    <Compile Include="Classes\AbstractGrid.cs" />
+    <Compile Include="Classes\ButtonGrid.cs" />
+    <Compile Include="Classes\Direction.cs" />
+    <Compile Include="Classes\IntVector2D.cs" />
+    <Compile Include="Classes\Ships\Battleship.cs" />
+    <Compile Include="Classes\Ships\Carrier.cs" />
+    <Compile Include="Classes\Ships\Cruiser.cs" />
+    <Compile Include="Classes\Ships\Destroyer.cs" />
+    <Compile Include="Classes\TileGrid.cs" />
     <Compile Include="Classes\Player.cs" />
-    <Compile Include="Classes\Submarine.cs" />
+    <Compile Include="Classes\Ships\Ship.cs" />
+    <Compile Include="Classes\Ships\Submarine.cs" />
     <Compile Include="Classes\Tile.cs" />
     <Compile Include="GameWindow.cs">
       <SubType>Form</SubType>
@@ -61,7 +66,13 @@
     <Compile Include="GameWindow.Designer.cs">
       <DependentUpon>GameWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\IButtonGrid.cs" />
+    <Compile Include="Interfaces\IGrid.cs" />
+    <Compile Include="Interfaces\IPlayer.cs" />
     <Compile Include="Interfaces\IShip.cs" />
+    <Compile Include="Interfaces\ITile.cs" />
+    <Compile Include="Interfaces\ITileActor.cs" />
+    <Compile Include="Interfaces\IVector2D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="GameWindow.resx">

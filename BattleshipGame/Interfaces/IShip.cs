@@ -6,9 +6,17 @@ using System.Threading.Tasks;
 
 namespace BattleshipGame
 {
-    interface IShip
+    public interface IShip
     {
-        int shipSize { get; set; }
+        /// <summary>
+        /// Size of the ship.
+        /// </summary>
+        int Size { get; }
+
+        /// <summary>
+        /// Name of the ship type.
+        /// </summary>
+        string Name { get; }
 
     }
 }

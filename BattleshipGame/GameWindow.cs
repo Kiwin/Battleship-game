@@ -1,31 +1,50 @@
 ﻿using BattleshipGame.Classes;
+using BattleshipGame.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace BattleshipGame
 {
     public partial class GameWindow : Form
     {
-        // Grids
-        private Grid player1SecretGrid;
-        private Grid player2SecretGrid;
-        private Grid player1PublicGrid;
-        private Grid player2PublicGrid;
-        // Players
-        private Player player1;
-        private Player player2;
-        // Game state enum. Creation is ship placement. InPlay is ship targeting
-        private enum State { Creation, InPlay}
-        private State gameState;
-        // Current player
-        private Player curPlayer;
+        //Grid
+        private const int gridColumns = 10;
+        private const int gridRows = 10;
+        private int tileWidth { get { return tileButtonTablePanel.Width / gridColumns; } }
+        private int tileHeight { get { return tileButtonTablePanel.Width / gridRows; } }
+
+        //Player Fields
+        private const int PlayerCount = 2;
+        private List<Player> Players;
+        private Player CurrentPlayer { get; set; }
+        private Player FirstPlayer
+        {
+            get { return Players[0]; }
+        }
+        private Player LastPlayer
+        {
+            get { return Players[Players.Count - 1]; }
+        }
+        private Player NextPlayer
+        {
+            get { return Players[(Players.IndexOf(CurrentPlayer) + 1) % Players.Count]; }
+        }
+        private ButtonGrid ButtonGrid { get; set; }
+
+        //GameState
+        private enum GameState { Initializing, Placement, InPlay, GameOver }
+        private GameState gameState;
+
         public GameWindow()
         {
             InitializeComponent();
@@ -33,254 +52,260 @@ namespace BattleshipGame
 
         private void GameWindow_Load(object sender, EventArgs e)
         {
-            // Debug
-            // Assign the groupboxes parents to this window instead of eachother
-            // This is done because the grouping in the designer makes it so each GroupBox after the first one is a child of the first one
-            player1SecretGridGroupBox.Parent = this;
-            player2SecretGridGroupBox.Parent = this;
-            player1PublicGridGroupBox.Parent = this;
-            player2PublicGridGroupBox.Parent = this;
+            InitializeButtonGridGroupBox();
+            InitializeNewGame();
         }
-        // Event handler for Click event on tiles on grids
-        void tileBtn_Click(object sender, EventArgs e)
+        private void InitializeButtonGridGroupBox()
         {
-            Button button = (Button)sender;
-            // Tile is set to the tile in the players public grid which corresponds to the button that is clicked
-            Tile tile = curPlayer.publicGrid.tiles.Where(t => t._button.Name == button.Name).FirstOrDefault();
-            // Index of the tile
-            int index = curPlayer.publicGrid.tiles.IndexOf(tile);
+            gridGroupBox.Parent = this;
+            gridGroupBox.Dock = DockStyle.Fill;
 
-            // Determine state of game
-            switch (gameState)
+            InitializeTileButtonTablePanel();
+        }
+
+        private void InitializeTileButtonTablePanel()
+        {
+            tileButtonTablePanel.ColumnCount = gridColumns;
+            tileButtonTablePanel.RowCount = gridRows;
+
+            tileButtonTablePanel.ColumnStyles.Clear();
+            tileButtonTablePanel.RowStyles.Clear();
+
+            for (int i = 0; i < gridColumns; i++)
             {
-                case State.Creation:
-                    break;
-                case State.InPlay:
-                    // Player 1's turn
-                    if(curPlayer == player1)
-                    {
-                        // Does the other player have any occupied tiles left ie. any ships left.
-                        if (player2.secretGrid.occupiedTilesCount != 0)
-                        {
-                            // Determine hit or miss
-                            tile.DetermineHitOrMiss(player2.secretGrid, index);
-                            // End turn
-                            endTurnBtn.PerformClick();
-                        }
-                        // Game over
-                        else
-                        {
-                            Console.WriteLine("Game over");
-                        }
-                    }
-                    // Player 2's turn
-                    else if(curPlayer == player2)
-                    {
-                        // Does the other player have any occupied tiles left ie. any ships left.
-                        if (player1.secretGrid.occupiedTilesCount != 0)
-                        {
-                            // Determine hit or miss
-                            tile.DetermineHitOrMiss(player1.secretGrid, index);
-                            // End turn
-                            endTurnBtn.PerformClick();
-                        }
-                        // Game over
-                        else
-                        {
-                            Console.WriteLine("Game over");
-                        }
-                    }
+                tileButtonTablePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100 / gridColumns));
+            }
+            for (int i = 0; i < gridRows; i++)
+            {
+                tileButtonTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100 / gridRows));
+            }
 
-                    break;
-                default:
-                    break;
+            //Populate 
+            ButtonGrid = new ButtonGrid(gridColumns, gridRows);
+            ButtonGrid.ButtonClicked += ButtonGrid_ButtonClicked;
+
+            for (int column = 0; column < ButtonGrid.ColumnCount; column++)
+            {
+                for (int row = 0; row < ButtonGrid.RowCount; row++)
+                {
+                    var position = new IntVector2D(row, column);
+                    var button = ButtonGrid.GetCellAt(position);
+                    tileButtonTablePanel.Controls.Add(button);
+                    button.Width = tileWidth;
+                    button.Height = tileHeight;
+                    button.Text = position.ToString();
+                    button.Dock = DockStyle.Fill;
+                }
+
             }
         }
 
-        private void newGameBtn_Click(object sender, EventArgs e)
+        private void ButtonGrid_ButtonClicked(object sender, ButtonGridClickedArgs args)
         {
-            Reset();
+            // Determine state of game and handle accordingly.
+            switch (gameState)
+            {
+                case GameState.Placement:
+                    HandlePlacementPhaseTileClick(tilePosition: args.ButtonPosition);
+                    break;
+                case GameState.InPlay:
+                    HandleInPlayTileClick(tilePosition: args.ButtonPosition);
+                    break;
+            }
+            UpdateVisuals();
+        }
 
-            // Create Grid objects with GroupBox control
-            player1SecretGrid = new Grid(player1SecretGridGroupBox);
-            player2SecretGrid = new Grid(player2SecretGridGroupBox);
-            player1PublicGrid = new Grid(player1PublicGridGroupBox);
-            player2PublicGrid = new Grid(player2PublicGridGroupBox);
-
+        private void InitializeNewGame()
+        {
             // Set Gamestate
-            gameState = State.Creation;
+            gameState = GameState.Initializing;
+
+            //Create player loadouts
+            List<IShip> playerLoadout = new List<IShip>();
+            AddBattleshipsToLoadout(1, playerLoadout);
+            AddCarriersToLoadout(1, playerLoadout);
+            AddCruisersToLoadout(1, playerLoadout);
+            AddDestroyersToLoadout(1, playerLoadout);
+            AddSubmarinesToLoadout(1, playerLoadout);
 
             // Instantiate Players
-            player1 = new Player();
-            player2 = new Player();
+            Players = new List<Player>();
 
-            // Set the players' grids
-            player1.secretGrid = player1SecretGrid;
-            player2.secretGrid = player2SecretGrid;
-            player1.publicGrid = player1PublicGrid;
-            player2.publicGrid = player2PublicGrid;
-
-            // Set current player to player1
-            curPlayer = player1;
-
-            // Place ships for current player
-            PlaceShips(curPlayer);
-
-            // Attach event handler to each button (tile) in the GroupBox (grid)
-            foreach (Control control in this.player1PublicGridGroupBox.Controls)
+            for (int i = 0; i < PlayerCount; i++)
             {
-                if (control is Button)
-                {
-                    // Make every button clickable
-                    control.Enabled = true;
-
-                    // Attach event handler
-                    control.Click += new EventHandler(tileBtn_Click);
-                }
+                var newSecretGrid = GenerateTileGrid();
+                var newPublicGrid = GenerateTileGrid();
+                var newLoadout = new List<IShip>(playerLoadout);
+                var playerName = "player" + (i + 1);
+                var newPlayer = new Player(playerName, newLoadout, newPublicGrid, newSecretGrid);
+                Players.Add(newPlayer);
             }
 
-            // Attach event handler to each button (tile) in the GroupBox (grid)
-            foreach (Control control in this.player2PublicGridGroupBox.Controls)
-            {
-                if (control is Button)
-                {
-                    // Make every button clickable
-                    control.Enabled = true;
+            CurrentPlayer = FirstPlayer;
 
-                    // Attach event handler
-                    control.Click += new EventHandler(tileBtn_Click);
-                }
-            }
+            //Start the placement phase.
+            gameState = GameState.Placement;
         }
 
-        // Function to PlaceShips
-        void PlaceShips(Player curPlayer)
+        private IGrid<ITile> GenerateTileGrid()
         {
-            // 1 carrier
-            int carriersLeft = 1;
-            if (carriersLeft != 0)
-            {
-                foreach (Carrier carrier in curPlayer.carriers)
-                {
-                    // PlaceShip function is called on the current player's secret grid. The carrier's shipSize is passed in as parameter
-                    curPlayer.secretGrid.PlaceShip(carrier.shipSize);
-                    // Decrement carriersLeft
-                    carriersLeft--;
-                }
-                // Clear the carriers list on the current player
-                curPlayer.carriers.Clear();
-            }
-            int battleshipsLeft = 2;
-            if (battleshipsLeft != 0)
-            {
-                foreach (Battleship btlShip in curPlayer.battleships)
-                {
-                    curPlayer.secretGrid.PlaceShip(btlShip.shipSize);
-                    battleshipsLeft--;
-                }
-                curPlayer.battleships.Clear();
-            }
-            int cruisersLeft = 3;
-            if (cruisersLeft != 0)
-            {
-                foreach (Cruiser cruiser in curPlayer.cruisers)
-                {
-                    curPlayer.secretGrid.PlaceShip(cruiser.shipSize);
-                    cruisersLeft--;
-                }
-                curPlayer.cruisers.Clear();
-            }
-            int submarinesLeft = 4;
-            if (submarinesLeft != 0)
-            {
-                foreach (Submarine submarine in curPlayer.submarines)
-                {
-                    curPlayer.secretGrid.PlaceShip(submarine.shipSize);
-                    submarinesLeft--;
-                }
-                curPlayer.submarines.Clear();
-            }
-            int destroyersLeft = 5;
-            if (destroyersLeft != 0)
-            {
-                foreach (Destroyer destroyer in curPlayer.destroyers)
-                {
-                    curPlayer.secretGrid.PlaceShip(destroyer.shipSize);
-                    destroyersLeft--;
-                }
-                curPlayer.destroyers.Clear();
-            }
+            return new TileGrid(gridColumns, gridRows);
         }
 
-        private void endTurnBtn_Click(object sender, EventArgs e)
+        private void HandlePlacementPhaseTileClick(IVector2D<int> tilePosition)
         {
-            switch (gameState)
+            IShip ship = CurrentPlayer.ShipsToBePlaced[0];
+
+            //Attempt to place the ship
+            var placementResult = PlaceShip(ship, tilePosition, Direction.East, CurrentPlayer.SecretGrid);
+
+            if (placementResult == ShipPlacementResult.ShipWasPlaced)
             {
-                case State.Creation:
-                    // Check whose turn it is by checking which player's grid is visible
-                    // Player 1's turn
-                    if(curPlayer == player1)
-                    {
-                        // Set player 1's grid to invisible
-                        player1.secretGrid.playerGroupBox.Visible = false;
-                        // Set player 2's grid to visible
-                        player2.secretGrid.playerGroupBox.Visible = true;
-                        // Set the current player to player2
-                        curPlayer = player2;
-                        // Place player 2's ships
-                        PlaceShips(curPlayer);
-
-                    }
-                    // Player 2's turn
-                    else if (curPlayer == player2)
-                    {
-                        // Set player 2's grid to invisible
-                        player2.secretGrid.playerGroupBox.Visible = false;
-
-                        // Set player 1's grid to visible
-                        player1.publicGrid.playerGroupBox.Visible = true;
-
-                        // Set the current player to player1
-                        curPlayer = player1;
-                        // Set gamestate to inplay
-                        gameState = State.InPlay;
-                    }
-                    break;
-                case State.InPlay:
-                    // Player 1's turn
-                    if (curPlayer == player1)
-                    {
-                        // Set the current player to player 2
-                        curPlayer = player2;
-                        // Set player1's groupbox to invisible
-                        player1.publicGrid.playerGroupBox.Visible = false;
-                        // Set player2's groupbox to visible
-                        player2.publicGrid.playerGroupBox.Visible = true;
-                    }
-                    // Player 2's turn
-                    else if (curPlayer == player2)
-                    {
-                        // Set player to player1
-                        curPlayer = player1;
-                        // Set player2's groupbox to invisible
-                        player2.publicGrid.playerGroupBox.Visible = false;
-                        // Set player1's groupbox to visible
-                        player1.publicGrid.playerGroupBox.Visible = true;
-                    }
-                    break;
-                default:
-                    break;
+                CurrentPlayer.ShipsToBePlaced.Remove(ship);
+                DecidePhaseAfterPlacement();
             }
         }
 
-        //  Reset game
-        private void Reset()
+        public ShipPlacementResult PlaceShip(IShip ship, IVector2D<int> position, Direction direction, IGrid<ITile> grid)
         {
-            GameWindow_Load(this, null);
+            //Check if one end of the ship if out of bounds.
+            if (grid.PositionIsOutOfBounds(position)) return ShipPlacementResult.ShipWasNotPlaced;
+
+            //Check if the other end of the ship if out of bounds.
+            IVector2D<int> shipVector = direction.ToIntVector(ship.Size);
+            IVector2D<int> shipVectorOffset = position.Clone().Add(shipVector);
+            if (grid.PositionIsOutOfBounds(shipVectorOffset)) return ShipPlacementResult.ShipWasNotPlaced;
+
+            //List of tiles that the ship is going to occupy.
+            List<ITile> checkedTiles = new List<ITile>();
+            IVector2D<int> shipNormalVector = direction.ToIntVector();
+
+            //Check if any tile along the given direction in the magnitude of the ships length is occupied.
+            for (int i = 0; i < ship.Size; i++)
+            {
+                IVector2D<int> interpolatedShipVector = shipNormalVector.Clone().Mul(i);
+                IVector2D<int> tilePosition = position.Clone();
+                tilePosition.Add(interpolatedShipVector);
+
+                if (grid.PositionIsOutOfBounds(tilePosition)) return ShipPlacementResult.ShipWasNotPlaced;
+                ITile tile = grid.GetCellAt(tilePosition);
+
+                //If any tile in the magnitude of the ship is occupied then cancel placement.
+                if (tile.IsOccupied) return ShipPlacementResult.ShipWasNotPlaced;
+
+                //Add tile for later assignment.
+                checkedTiles.Add(tile);
+            }
+
+            foreach (ITile tile in checkedTiles)
+            {
+                tile.Occupant = ship;
+            }
+
+            //Ship placement was successful.
+            return ShipPlacementResult.ShipWasPlaced;
         }
-        // TODO: Make curPlayer variable
-        // TODO: Place placecarrier function in a smart place (Event handler for button click after placecarrier button has been clicked)
-        // TODO: find a way to start the game
-        // TODO: Determine which player's turn it is
+
+        private void HandleInPlayTileClick(IVector2D<int> tilePosition)
+        {
+
+        }
+
+        private void DecidePhaseAfterPlacement()
+        {
+            if (CurrentPlayer.ShipsToBePlaced.Count == 0)
+            {
+                if (CurrentPlayer == LastPlayer)
+                {
+                    SwitchToInPlayPhase();
+                    return;
+                }
+                CurrentPlayer = NextPlayer;
+            }
+        }
+
+        private void SwitchToInPlayPhase()
+        {
+            CurrentPlayer = Players[0];
+            gameState = GameState.InPlay;
+        }
+
+        private void NewGameBtn_Click(object sender, EventArgs e)
+        {
+            InitializeNewGame();
+        }
+
+        private void UpdateVisuals()
+        {
+            gridGroupBox.Text = CurrentPlayer.Name;
+            var gridToRender = CurrentPlayer.SecretGrid;
+
+
+
+            ProjectTileGridToButtonGrid(gridToRender, ButtonGrid);
+        }
+
+        private Color GenerateColorFromTileState(ITile tile)
+        {
+            if (tile.IsOccupied) return Color.Red;
+            return Color.Wheat;
+        }
+
+        private void ProjectTileGridToButtonGrid(IGrid<ITile> tileGrid, IGrid<Button> buttonGrid)
+        {
+            //Check if the two grids have the same dimensions.
+            if (tileGrid.ColumnCount != buttonGrid.ColumnCount || tileGrid.RowCount != buttonGrid.RowCount)
+            {
+                throw new Exception("The two grids differ dimensionally, and can therefore not be projected upon another.");
+            }
+
+            for (int column = 0; column < buttonGrid.ColumnCount; column++)
+            {
+                for (int row = 0; row < buttonGrid.RowCount; row++)
+                {
+                    var position = new IntVector2D(column, row);
+                    var tile = tileGrid.GetCellAt(position);
+                    var buttonColor = GenerateColorFromTileState(tile);
+                    buttonGrid.GetCellAt(position).BackColor = buttonColor;
+                }
+            }
+        }
+        private void AddCarriersToLoadout(int amount, List<IShip> shipsList)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                shipsList.Add(new Carrier());
+            }
+        }
+        private void AddBattleshipsToLoadout(int amount, List<IShip> shipsList)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                shipsList.Add(new Battleship());
+            }
+        }
+        private void AddCruisersToLoadout(int amount, List<IShip> shipsList)
+        {
+            // 1 carrier per player
+            for (int i = 0; i < amount; i++)
+            {
+                shipsList.Add(new Cruiser());
+            }
+        }
+        private void AddSubmarinesToLoadout(int amount, List<IShip> shipsList)
+        {
+            // 1 carrier per player
+            for (int i = 0; i < amount; i++)
+            {
+                shipsList.Add(new Submarine());
+            }
+        }
+        private void AddDestroyersToLoadout(int amount, List<IShip> shipsList)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                shipsList.Add(new Destroyer());
+            }
+        }
     }
 }
